@@ -243,6 +243,16 @@ async function main() {
     if (!result.problems.length)
       process.stdout.write(`${artifact.name}: ${result.sources} sources, no unexpected source or credential.\n`);
   }
+  // The source-map scan builds the frontend in a temporary folder. Build the
+  // actual static bundle too, so this check works in a clean checkout and
+  // never scans a stale local build.
+  const bundleBuild = spawnSync('pnpm', ['build:app'], {
+    cwd: root,
+    stdio: ['ignore', 'ignore', 'pipe'],
+    shell: process.platform === 'win32',
+  });
+  if (bundleBuild.error) throw bundleBuild.error;
+  if (bundleBuild.status !== 0) throw new Error(`static App Bundle build failed:\n${bundleBuild.stderr}`);
   problems.push(...(await scanBundle(join(root, 'apps/contentful-app/build'), secrets)));
   if (problems.length) throw new Error(problems.join('\n'));
   process.stdout.write(
