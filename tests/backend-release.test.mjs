@@ -39,7 +39,7 @@ beforeEach(() => {
   git(['init', '-q', '-b', 'main']);
   git(['config', 'user.name', 'Release test']);
   git(['config', 'user.email', 'release@example.invalid']);
-  git(['init', '--bare', '-q', remote]);
+  git(['init', '--bare', '-q', '-b', 'main', remote]);
   git(['remote', 'add', 'origin', remote]);
   commits = [];
   commit(
