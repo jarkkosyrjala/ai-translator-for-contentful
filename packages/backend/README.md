@@ -8,6 +8,8 @@ Node.js 24 or later. JavaScript and TypeScript declarations are included; ES mod
 
 ## Install
 
+The first npm publication is pending. Until it is available, [build and install the tarball from source](#build-from-source). Once published, install from the registry:
+
 ```sh
 npm install @ai-translator-for-contentful/backend
 ```

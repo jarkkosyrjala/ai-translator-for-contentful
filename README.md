@@ -31,6 +31,8 @@ The Worker, Azure, and AWS backends are **Custom backends**: HTTPS services that
 
 ### npm backend package
 
+The first npm publication is pending. Until it is available, [build and install its tarball from source](packages/backend/README.md#build-from-source).
+
 [`@ai-translator-for-contentful/backend`](https://www.npmjs.com/package/@ai-translator-for-contentful/backend) runs the same Custom backend in a Node.js server, a cluster, another serverless platform, or a route of an existing Azure Function App:
 
 ```sh
