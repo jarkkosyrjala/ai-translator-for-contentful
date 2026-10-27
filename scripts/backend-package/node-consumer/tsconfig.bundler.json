@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.nodenext.json",
+  "compilerOptions": { "module": "ESNext", "moduleResolution": "Bundler" },
+  "files": ["consumer.ts"]
+}

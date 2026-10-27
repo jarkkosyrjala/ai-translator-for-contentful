@@ -1,0 +1,78 @@
+{
+  "name": "List provider models",
+  "description": "List the saved provider's model IDs for app configuration without a model call.",
+  "type": "function-invocation",
+  "function": {
+    "sys": {
+      "type": "Link",
+      "linkType": "Function",
+      "id": "providerModels"
+    }
+  },
+  "category": "Custom",
+  "parametersSchema": {
+    "type": "object",
+    "properties": {
+      "contract": {
+        "type": "integer",
+        "enum": [1]
+      }
+    },
+    "required": ["contract"],
+    "additionalProperties": false
+  },
+  "resultSchema": {
+    "type": "object",
+    "properties": {
+      "contract": {
+        "type": "integer",
+        "enum": [1]
+      },
+      "status": {
+        "type": "string",
+        "enum": ["ok", "failed"]
+      },
+      "modelCall": {
+        "type": "boolean",
+        "enum": [false]
+      },
+      "models": {
+        "type": "array",
+        "maxItems": 1000,
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      },
+      "errorCode": {
+        "type": "string",
+        "enum": [
+          "function_not_configured",
+          "profile_invalid",
+          "invalid_provider_url",
+          "model_list_unavailable",
+          "unsupported_contract",
+          "invalid_request",
+          "unexpected_property",
+          "same_locale",
+          "request_too_large",
+          "model_not_allowed",
+          "provider_not_allowed",
+          "provider_rate_limited",
+          "provider_auth_failed",
+          "provider_timeout",
+          "provider_truncated",
+          "provider_incomplete",
+          "provider_refused",
+          "provider_request_too_large",
+          "invalid_provider_response",
+          "result_too_large",
+          "provider_failed"
+        ]
+      }
+    },
+    "required": ["contract", "status", "modelCall"],
+    "additionalProperties": false
+  }
+}

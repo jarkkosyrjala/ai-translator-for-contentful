@@ -1,0 +1,16 @@
+packages:
+  - .
+  - apps/*
+  - backends/*
+  - packages/*
+
+allowBuilds:
+  esbuild: true
+  protobufjs: false
+  workerd: true
+overrides:
+  '@platejs/core': 53.3.15
+  '@platejs/slate': 53.3.15
+  '@platejs/utils': 53.3.15
+  slate: 0.126.2
+  slate-react: 0.127.1

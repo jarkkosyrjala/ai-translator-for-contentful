@@ -1,0 +1,64 @@
+{
+  "name": "ai-translator-for-contentful",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Contentful app that suggests translations for editors to review and apply to entry drafts.",
+  "author": "Jarkko Syrjälä (https://github.com/jarkkosyrjala)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jarkkosyrjala/ai-translator-for-contentful.git"
+  },
+  "homepage": "https://github.com/jarkkosyrjala/ai-translator-for-contentful#readme",
+  "bugs": {
+    "url": "https://github.com/jarkkosyrjala/ai-translator-for-contentful/issues"
+  },
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.2",
+    "@cloudflare/workers-types": "^5.20261021.1",
+    "@contentful/app-sdk": "^4.75.0",
+    "@contentful/rich-text-types": "^17.2.7",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/github": "^12.0.10",
+    "@semantic-release/release-notes-generator": "^14.1.1",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "semantic-release": "^25.0.9",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  },
+  "scripts": {
+    "lint": "biome check --error-on-warnings",
+    "format": "biome check --write",
+    "typecheck": "tsc --noEmit && pnpm --recursive run typecheck",
+    "test": "vitest run",
+    "build": "pnpm --recursive run build",
+    "build:app": "pnpm --filter @ai-translator-for-contentful/app build",
+    "build:function-bundle": "pnpm --filter @ai-translator-for-contentful/app --filter @ai-translator-for-contentful/backend-function build",
+    "dev": "pnpm --filter @ai-translator-for-contentful/app dev",
+    "dev:https": "pnpm --filter @ai-translator-for-contentful/app dev:https",
+    "worker:dev": "pnpm --filter @ai-translator-for-contentful/backend-cloudflare dev",
+    "worker:dry-run": "pnpm --filter @ai-translator-for-contentful/backend-cloudflare dry-run",
+    "relay:setup": "node scripts/relay-setup.mjs",
+    "azure:dev": "pnpm --filter @ai-translator-for-contentful/backend-azure dev",
+    "lambda:build": "pnpm --filter @ai-translator-for-contentful/backend-aws-lambda build",
+    "test:dynamodb": "pnpm --filter @ai-translator-for-contentful/backend-aws-lambda test:dynamodb",
+    "create-app-definition": "pnpm --filter @ai-translator-for-contentful/app exec contentful-app-scripts create-app-definition",
+    "check:static-upload": "node scripts/upload-static-bundle.mjs --check",
+    "upload:static-ci": "node scripts/upload-static-bundle.mjs",
+    "check:function-networks": "node scripts/upload-function-bundle.mjs --check",
+    "upload:function-ci": "node scripts/upload-function-bundle.mjs",
+    "sync:function-action": "node scripts/sync-function-action.mjs",
+    "sync:parameters": "node scripts/sync-parameter-definitions.mjs",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
+    "check:artifacts": "node scripts/scan-artifacts.mjs",
+    "check:backend-package": "node scripts/check-backend-package.mjs",
+    "package:artifacts": "node scripts/package-artifacts.mjs"
+  }
+}

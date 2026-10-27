@@ -1,0 +1,30 @@
+{
+  "name": "@ai-translator-for-contentful/backend",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "AI Translator for Contentful's backend for Node.js servers, serverless hosts, and existing Azure Function Apps.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./node": "./src/node.ts",
+    "./azure": "./src/azure/adapter.ts",
+    "./azure-tables": "./src/azure/table-gate.ts"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ai-translator-for-contentful/protocol": "workspace:*",
+    "@ai-translator-for-contentful/relay": "workspace:*"
+  },
+  "devDependencies": {
+    "@ai-translator-for-contentful/relay-conformance": "workspace:*",
+    "@azure/data-tables": "^13.3.2",
+    "@azure/functions": "^4.17.0",
+    "azurite": "^3.37.0",
+    "esbuild": "^0.28.2"
+  }
+}

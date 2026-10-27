@@ -1,0 +1,20 @@
+{
+  "name": "@ai-translator-for-contentful/backend-function",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node -e \"fs.rmSync('build', { recursive: true, force: true })\" && contentful-app-scripts build-functions --ci",
+    "typecheck": "tsc --noEmit -p functions/tsconfig.json"
+  },
+  "dependencies": {
+    "@ai-translator-for-contentful/protocol": "workspace:*",
+    "@ai-translator-for-contentful/provider": "workspace:*"
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^2.3.0",
+    "@contentful/node-apps-toolkit": "^3.11.1",
+    "@tsconfig/recommended": "1.0.8"
+  }
+}

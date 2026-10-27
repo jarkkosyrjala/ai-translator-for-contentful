@@ -1,0 +1,16 @@
+{
+  "name": "@ai-translator-for-contentful/protocol",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@rgrove/parse-xml": "^5.0.0"
+  }
+}

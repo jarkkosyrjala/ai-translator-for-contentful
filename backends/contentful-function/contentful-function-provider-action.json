@@ -1,0 +1,159 @@
+{
+  "name": "Translate with provider",
+  "description": "Provider-backed translation through a Contentful Function and installation Secret.",
+  "type": "function-invocation",
+  "function": {
+    "sys": {
+      "type": "Link",
+      "linkType": "Function",
+      "id": "translateProvider"
+    }
+  },
+  "category": "Custom",
+  "parametersSchema": {
+    "type": "object",
+    "properties": {
+      "contract": {
+        "type": "integer",
+        "enum": [1]
+      },
+      "requestId": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "entryId": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "model": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "sourceLocale": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 35
+      },
+      "targetLocale": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 35
+      },
+      "availableLocales": {
+        "type": "array",
+        "maxItems": 50,
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 35
+        }
+      },
+      "profile": {
+        "type": "object"
+      },
+      "profileRevision": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "runGuidance": {
+        "type": "string",
+        "maxLength": 1000
+      },
+      "variableValues": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      },
+      "context": {
+        "type": "array",
+        "maxItems": 200,
+        "items": {
+          "type": "object"
+        }
+      },
+      "fields": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 200,
+        "items": {
+          "type": "object"
+        }
+      }
+    },
+    "required": [
+      "contract",
+      "requestId",
+      "entryId",
+      "model",
+      "sourceLocale",
+      "targetLocale",
+      "availableLocales",
+      "profile",
+      "profileRevision",
+      "fields"
+    ],
+    "additionalProperties": false
+  },
+  "resultSchema": {
+    "type": "object",
+    "properties": {
+      "contract": {
+        "type": "integer",
+        "enum": [1]
+      },
+      "requestId": {
+        "type": "string",
+        "maxLength": 100
+      },
+      "provider": {
+        "type": "string",
+        "enum": ["openai-compatible"]
+      },
+      "profileRevision": {
+        "type": "string",
+        "maxLength": 100
+      },
+      "results": {
+        "type": "array",
+        "maxItems": 200,
+        "items": {
+          "type": "object"
+        }
+      },
+      "errorCode": {
+        "type": "string",
+        "enum": [
+          "function_not_configured",
+          "profile_invalid",
+          "invalid_provider_url",
+          "model_list_unavailable",
+          "unsupported_contract",
+          "invalid_request",
+          "unexpected_property",
+          "same_locale",
+          "request_too_large",
+          "model_not_allowed",
+          "provider_not_allowed",
+          "provider_rate_limited",
+          "provider_auth_failed",
+          "provider_timeout",
+          "provider_truncated",
+          "provider_incomplete",
+          "provider_refused",
+          "provider_request_too_large",
+          "invalid_provider_response",
+          "result_too_large",
+          "provider_failed"
+        ]
+      }
+    },
+    "required": ["contract", "requestId"],
+    "additionalProperties": false
+  }
+}

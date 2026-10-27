@@ -1,0 +1,31 @@
+{
+  "functions": [
+    {
+      "id": "functionHealth",
+      "name": "AI Translator for Contentful connection check",
+      "description": "Validates saved Function configuration without a model call.",
+      "path": "functions/functionHealth.js",
+      "entryFile": "functions/functionHealth.ts",
+      "allowNetworks": [],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "providerModels",
+      "name": "AI Translator for Contentful model list",
+      "description": "Lists the provider's model IDs for app configuration without a model call.",
+      "path": "functions/providerModels.js",
+      "entryFile": "functions/providerModels.ts",
+      "allowNetworks": [],
+      "accepts": ["appaction.call"]
+    },
+    {
+      "id": "translateProvider",
+      "name": "AI Translator for Contentful translation",
+      "description": "Translates through the installation's approved provider and Secret.",
+      "path": "functions/translateProvider.js",
+      "entryFile": "functions/translateProvider.ts",
+      "allowNetworks": [],
+      "accepts": ["appaction.call"]
+    }
+  ]
+}

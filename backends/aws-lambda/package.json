@@ -1,0 +1,24 @@
+{
+  "name": "@ai-translator-for-contentful/backend-aws-lambda",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:dynamodb": "vitest run --config vitest.dynamodb.config.ts"
+  },
+  "dependencies": {
+    "@ai-translator-for-contentful/relay": "workspace:*",
+    "@aws-lambda-powertools/parameters": "^2.36.0",
+    "@aws-sdk/client-dynamodb": "^3.1156.0",
+    "@aws-sdk/client-secrets-manager": "^3.1156.0"
+  },
+  "devDependencies": {
+    "@ai-translator-for-contentful/relay-conformance": "workspace:*",
+    "@types/aws-lambda": "^8.10.164",
+    "esbuild": "^0.28.2"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    // pnpm writes the lockfile.
+    "includes": ["**", "!pnpm-lock.yaml"]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "lineWidth": 120
+  },
+  "linter": {
+    "rules": {
+      "preset": "recommended",
+      "style": {
+        // Reports CSS selectors by source order alone; reordering them can change which styles win.
+        "noDescendingSpecificity": "off"
+      }
+    },
+    // Set explicitly because React is a dependency of the app package, not the root.
+    "domains": {
+      "react": "recommended",
+      "test": "recommended"
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "arrowParentheses": "asNeeded"
+    }
+  },
+  "markdown": {
+    "formatter": {
+      // Biome 2.6 removes the blank line between a paragraph and the list that follows it.
+      "enabled": false
+    }
+  },
+  "yaml": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  }
+}

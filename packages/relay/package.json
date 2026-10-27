@@ -1,0 +1,21 @@
+{
+  "name": "@ai-translator-for-contentful/relay",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ai-translator-for-contentful/protocol": "workspace:*",
+    "@ai-translator-for-contentful/provider": "workspace:*"
+  },
+  "devDependencies": {
+    "@ai-translator-for-contentful/relay-conformance": "workspace:*"
+  }
+}

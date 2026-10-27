@@ -1,0 +1,25 @@
+{
+  "name": "@ai-translator-for-contentful/backend-azure",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs && func start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ai-translator-for-contentful/backend": "workspace:*",
+    "@azure/data-tables": "^13.3.2",
+    "@azure/functions": "^4.17.0",
+    "@azure/identity": "^4.14.0"
+  },
+  "devDependencies": {
+    "@ai-translator-for-contentful/relay-conformance": "workspace:*",
+    "azurite": "^3.37.0",
+    "esbuild": "^0.28.2"
+  }
+}

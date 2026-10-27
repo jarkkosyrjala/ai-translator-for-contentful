@@ -1,0 +1,31 @@
+name: Question
+description: Ask about installing, configuring, or using the app.
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: Never post credentials, signing secrets, provider responses, or real entry content. Use synthetic text.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What you are trying to do, what you tried, and what happened.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The release or commit you installed.
+  - type: dropdown
+    id: backend
+    attributes:
+      label: Backend
+      options:
+        - Cloudflare Worker
+        - Azure Functions
+        - AWS Lambda
+        - npm backend package
+        - Contentful Function
+        - Another custom backend
+        - Not set up yet

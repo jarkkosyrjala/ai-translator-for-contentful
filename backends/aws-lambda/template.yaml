@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AI Translator for Contentful custom backend on AWS Lambda for the App Definitions and spaces that RELAY_CONFIG lists.
+
+# Build first with `pnpm lambda:build`; CodeUri points at the bundled handler.
+# See docs/aws-lambda.md.
+
+Parameters:
+  RelayConfig:
+    Type: String
+    MinLength: 2
+    Description: >-
+      RELAY_CONFIG as one line of JSON: App Definitions, their allowed spaces and providers, and provider settings.
+      It names secrets by ref; store their values in the RelaySecret JSON. See docs/aws-lambda.md.
+  FunctionTimeout:
+    Type: Number
+    Default: 610
+    MinValue: 60
+    MaxValue: 900
+    Description: >-
+      Lambda runtime limit in seconds. Provider deadlines stay 10 seconds below it; the default 610 fits the
+      600-second default. Raise it to 900 for an alias timeoutSeconds of up to 890. See docs/aws-lambda.md.
+  LogRetentionInDays:
+    Type: Number
+    Default: 30
+    AllowedValues: [1, 3, 5, 7, 14, 30, 60, 90, 180, 365]
+    Description: Days to keep the function's logs. The backend never logs request content or credentials.
+
+Resources:
+  # Holds the Contentful signing secrets and provider credentials as one JSON
+  # object keyed by the refs in RELAY_CONFIG. The template creates it empty and
+  # never sets its value, so stack updates leave the stored secret unchanged.
+  RelaySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: Contentful signing secrets and provider credentials of the AI Translator backend, as JSON keyed by RELAY_CONFIG refs.
+
+  # Usage gate: active reservations per App Definition, space, and environment,
+  # and request IDs that expire by time to live after a day.
+  UsageTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: expiresAt
+        Enabled: true
+
+  RelayLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: !Ref LogRetentionInDays
+
+  RelayFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: AI Translator for Contentful custom backend.
+      CodeUri: build/
+      Handler: index.handler
+      Runtime: nodejs24.x
+      Architectures: [arm64]
+      MemorySize: 256
+      # The relay reads the same value to keep provider deadlines within it.
+      Timeout: !Ref FunctionTimeout
+      LoggingConfig:
+        LogFormat: JSON
+        LogGroup: !Ref RelayLogGroup
+      Environment:
+        Variables:
+          NODE_OPTIONS: --enable-source-maps
+          RELAY_SECRET_ID: !Ref RelaySecret
+          USAGE_TABLE_NAME: !Ref UsageTable
+          RELAY_CONFIG: !Ref RelayConfig
+          FUNCTION_TIMEOUT_SECONDS: !Ref FunctionTimeout
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: secretsmanager:GetSecretValue
+              Resource: !Ref RelaySecret
+            # GetItem, Put, and Update cover the gate's reads and transactions.
+            - Effect: Allow
+              Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem]
+              Resource: !GetAtt UsageTable.Arn
+      # Public URL: the backend authenticates each request with Contentful's
+      # request signature. AWS SAM adds the lambda:InvokeFunctionUrl and
+      # lambda:InvokeFunction permissions, the latter limited to URL calls.
+      # No URL CORS configuration: the backend answers preflight itself.
+      FunctionUrlConfig:
+        AuthType: NONE
+
+Outputs:
+  BackendUrl:
+    Description: Enter this as the Backend URL in the app's Custom backend setting.
+    Value: !GetAtt RelayFunctionUrl.FunctionUrl
+  SecretArn:
+    Description: Store the secrets here as one JSON object keyed by the refs in RELAY_CONFIG.
+    Value: !Ref RelaySecret
+  FunctionName:
+    Description: Lambda function name, for logs and rollback.
+    Value: !Ref RelayFunction

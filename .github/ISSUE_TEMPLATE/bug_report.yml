@@ -1,0 +1,43 @@
+name: Bug report
+description: Something in the app, a backend, or the installation steps does not work.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Use synthetic text only. Never paste credentials, signing secrets, provider responses, or real entry content.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and the message the app showed.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+    validations:
+      required: true
+  - type: dropdown
+    id: backend
+    attributes:
+      label: Backend
+      options:
+        - Cloudflare Worker
+        - Azure Functions
+        - AWS Lambda
+        - npm backend package
+        - Contentful Function
+        - Another custom backend
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Contentful plan and browser
+      placeholder: Free, Chrome 140
+  - type: textarea
+    id: field
+    attributes:
+      label: Field type and steps to reproduce
+      description: For example, a Rich Text field with a table, translated from en-US to fi-FI.

@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      # Runs the AWS Lambda usage gate against DynamoDB's conditional writes.
+      dynamodb:
+        image: amazon/dynamodb-local:3.3.2
+        ports:
+          - 8000:8000
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Formatting, import order, and lint rules; warnings fail the build.
+      - run: pnpm exec biome ci --error-on-warnings
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm test:dynamodb
+        env:
+          DYNAMODB_ENDPOINT: http://localhost:8000
+      - run: pnpm check:boundaries
+      # Builds the frontend, Function bundle, Worker, Azure and Lambda functions, and npm backend package, and scans
+      # them and the static App Bundle.
+      - run: pnpm check:artifacts
+      # Installs the packed npm backend package in Node, TypeScript, and Azure Function App projects.
+      - run: pnpm check:backend-package
+
+  release:
+    if: github.ref == 'refs/heads/main' && vars.AUTO_RELEASE_ENABLED == 'true'
+    needs: check
+    runs-on: ubuntu-latest
+    concurrency:
+      group: release-main
+      cancel-in-progress: false
+    # Releases and tags only: release comments and labels are turned off.
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          # semantic-release pushes with GITHUB_TOKEN itself; dependency
+          # install scripts never see a stored credential.
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

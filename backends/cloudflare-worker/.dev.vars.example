@@ -1,0 +1,15 @@
+# Copy to .dev.vars, which Git ignores, for `pnpm worker:dev`.
+# RELAY_CONFIG lists the App Definition and space that will call this local
+# Worker, and the provider they may use. Keep it on one line in single quotes.
+# See docs/backend-contract.md#relay-configuration for every property.
+RELAY_CONFIG='{"appDefinitions":{"replace-with-app-definition-id":{"signingSecretRef":"APP_SIGNING_SECRET","spaces":{"replace-with-space-id":["primary"]}}},"providers":{"primary":{"baseUrl":"https://model.example/v1","model":"example-model","authMode":"bearer","credentialRef":"PROVIDER_API_KEY"}}}'
+
+# One line per secret RELAY_CONFIG names. Keep real values only in .dev.vars.
+APP_SIGNING_SECRET=replace-with-the-App-Definition-signing-secret
+PROVIDER_API_KEY=replace-with-provider-api-key
+
+# For a provider with an API-key header, set "authMode":"header" and
+# "authHeader":"X-API-Key". For no authentication, set "authMode":"none" and
+# omit "credentialRef". Extra provider headers go in a secret named by
+# "headersRef", as a JSON object. Request options go in the provider's
+# "options" object, for example {"temperature":0.1,"maxCompletionTokens":256}.

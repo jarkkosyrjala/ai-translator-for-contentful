@@ -1,0 +1,16 @@
+{
+  // Declarations for the npm package. Paths resolve workspace packages to
+  // their sources, which are then emitted too, so rootDir spans packages/ and
+  // build.mjs rewrites the workspace imports to relative ones.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "..",
+    "outDir": "build/types",
+    "paths": { "@ai-translator-for-contentful/*": ["../*/src/index.ts"] }
+  },
+  "include": [],
+  "files": ["src/index.ts", "src/node.ts", "src/azure/adapter.ts", "src/azure/table-gate.ts"]
+}

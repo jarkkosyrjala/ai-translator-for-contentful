@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "ai-translator-for-contentful",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-10-23",
+  "durable_objects": { "bindings": [{ "name": "USAGE_GATE", "class_name": "UsageGate" }] },
+  "migrations": [{ "tag": "usage-gate-v1", "new_sqlite_classes": ["UsageGate"] }],
+  "observability": { "enabled": true, "traces": { "enabled": true } }
+}
