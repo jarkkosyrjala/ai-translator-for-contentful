@@ -6,7 +6,13 @@ Your application supplies the server, configuration, secrets, coordination, and 
 
 Node.js 24 or later. JavaScript and TypeScript declarations are included; ES modules and CommonJS are both supported.
 
-The package is not published to the npm registry. [Build its tarball from source](#build-from-source) and install that file.
+## Install
+
+```sh
+npm install @ai-translator-for-contentful/backend
+```
+
+The [npm package](https://www.npmjs.com/package/@ai-translator-for-contentful/backend) is published through GitHub CI. Its versions and `backend-v<version>` source tags are independent of the app's `v<version>` releases: frontend-only changes do not publish the backend. You can also [build a tarball from source](#build-from-source).
 
 ## Entry points
 
@@ -158,13 +164,15 @@ mkdir -p artifacts
 npm pack ./packages/backend/dist --pack-destination artifacts
 ```
 
-Use the version of the release you checked out; without `--version` the package is `0.0.0`. `npm pack` writes `artifacts/ai-translator-for-contentful-backend-<version>.tgz`, which Git ignores. Install it in your project:
+Check out `backend-v<version>` for an npm release, and pass that version; without `--version` the package is `0.0.0`. `npm pack` writes `artifacts/ai-translator-for-contentful-backend-<version>.tgz`, which Git ignores. Install it in your project:
 
 ```sh
 npm install /path/to/ai-translator-for-contentful-backend-<version>.tgz
 ```
 
-`packages/backend/dist` is the publishable package. `pnpm check:backend-package` installs the packed tarball in Node.js, TypeScript, and Azure Function App projects outside the workspace; with `-- --core-tools` it also runs the Function App in Azure Functions Core Tools against Azurite.
+`packages/backend/dist` is the publishable package, with public npm access configured in its generated manifest. The source workspace's `package.json` remains private to prevent publishing TypeScript sources and internal workspace dependencies. The root and internal packages remain private too.
+
+`pnpm check:backend-package` installs the packed tarball in Node.js, TypeScript, and Azure Function App projects outside the workspace; `-- --version <version>` checks a specific release version. With `-- --core-tools` it also runs the Function App in Azure Functions Core Tools against Azurite.
 
 ## License
 

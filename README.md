@@ -27,7 +27,19 @@ This is an independent project built for Contentful. It is not affiliated with o
 | AWS Lambda | Your AWS account | Static | [AWS guide](docs/aws-lambda.md) |
 | Contentful Function | Contentful, on Premium and Enterprise plans | Function | [Function guide](docs/contentful-function.md) |
 
-The Worker, Azure, and AWS backends are **Custom backends**: HTTPS services that follow the [backend contract](docs/backend-contract.md). The [npm package](packages/backend/README.md), built from this repository and not published to the npm registry, runs the same backend in a Node.js server, another serverless platform, or a route of an existing Azure Function App. Another host can implement the same contract.
+The Worker, Azure, and AWS backends are **Custom backends**: HTTPS services that follow the [backend contract](docs/backend-contract.md). Another host can implement the same contract.
+
+### npm backend package
+
+[`@ai-translator-for-contentful/backend`](https://www.npmjs.com/package/@ai-translator-for-contentful/backend) runs the same Custom backend in a Node.js server, a cluster, another serverless platform, or a route of an existing Azure Function App:
+
+```sh
+npm install @ai-translator-for-contentful/backend
+```
+
+Node.js 24 or later is required. The package includes TypeScript declarations and supports ES modules and CommonJS. Your application supplies the server, configuration, secrets, and request coordination. See the [package guide](packages/backend/README.md) for Node.js and Azure examples. Backend npm versions are independent of the app's GitHub releases; frontend-only changes do not publish a new npm version.
+
+### App Bundles
 
 Contentful serves the app's frontend from an [App Bundle](https://www.contentful.com/developers/docs/extensibility/app-framework/app-bundle/) uploaded to your App Definition. This project builds two:
 

@@ -22,6 +22,8 @@ pnpm install
 
 Use the tag of the release you install, so the frontend and backend come from the same version. To upgrade, check out the new tag, then upload its App Bundle and redeploy its backend together.
 
+If you use the [npm backend package](../packages/backend/README.md) in your own server, install it from npm instead of building a bundled host. Its versions and `backend-v<version>` source tags are independent of the app's GitHub releases.
+
 ## 3. Create the App Definition
 
 Create a private App Definition through [Contentful's web app](https://app.contentful.com/) or the [Create Contentful App CLI](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/):

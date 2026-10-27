@@ -20,6 +20,9 @@ const fixtures = join(root, 'scripts/backend-package');
 const name = '@ai-translator-for-contentful/backend';
 const coreTools = process.argv.includes('--core-tools');
 const keep = process.argv.includes('--keep');
+const versionIndex = process.argv.indexOf('--version');
+const version = versionIndex < 0 ? '0.0.0' : process.argv[versionIndex + 1];
+if (!/^\d+\.\d+\.\d+$/.test(version ?? '')) throw new Error('Pass --version with a version such as 1.0.0.');
 const workspaceRequire = createRequire(join(root, 'packages/backend/package.json'));
 const tsc = join(root, 'node_modules/.bin/tsc');
 
@@ -100,6 +103,12 @@ async function inspect(work, tarball) {
     [manifest.name, manifest.private, manifest.devDependencies, manifest.scripts, Object.keys(manifest.dependencies)],
     [name, undefined, undefined, undefined, ['@rgrove/parse-xml']],
   );
+  expect('package version', manifest.version, version);
+  expect('public npm publication with provenance', manifest.publishConfig, {
+    access: 'public',
+    registry: 'https://registry.npmjs.org/',
+    provenance: true,
+  });
 }
 
 // Contentful-style signing and fixtures from the shared conformance library,
@@ -132,7 +141,8 @@ async function project(work, fixture, packageJson, dependencies) {
   const dir = join(work, fixture);
   await cp(join(fixtures, fixture), dir, { recursive: true });
   await writeFile(join(dir, 'package.json'), `${JSON.stringify({ private: true, ...packageJson }, null, 2)}\n`);
-  run('npm', ['install', '--no-audit', '--no-fund', '--prefer-offline', ...dependencies], dir);
+  // These public consumers need no install hooks, including in the publishing job.
+  run('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', '--prefer-offline', ...dependencies], dir);
   return dir;
 }
 
@@ -493,7 +503,7 @@ async function coreToolsRun(dir, client, { prefix, stream, cors }, storage, prov
 async function main() {
   const work = await mkdtemp(join(tmpdir(), 'backend-package-'));
   try {
-    run('pnpm', ['--filter', name, 'build'], root);
+    run('node', ['packages/backend/build.mjs', '--version', version], root);
     run('npm', ['pack', '--pack-destination', work, '--silent'], join(root, 'packages/backend/dist'));
     const tarball = join(
       work,

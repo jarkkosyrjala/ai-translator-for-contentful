@@ -66,3 +66,35 @@ jobs:
       - run: pnpm exec semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-backend:
+    if: github.ref == 'refs/heads/main' && vars.NPM_RELEASE_ENABLED == 'true'
+    needs: check
+    runs-on: ubuntu-latest
+    concurrency:
+      group: release-backend-main
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          # Keep the publishing job independent of dependency caches.
+          package-manager-cache: false
+      - run: pnpm install --frozen-lockfile
+      # npm verifies the generated public manifest before release analysis.
+      # prepare then rebuilds and checks the selected release version.
+      - run: pnpm --filter @ai-translator-for-contentful/backend build
+      - run: node scripts/release-backend.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Bootstrap only. After npm trusted publishing is configured,
+          # remove this secret; publication then uses GitHub OIDC.
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

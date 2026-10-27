@@ -135,6 +135,7 @@ await writeFile(
       homepage: `${repository}/tree/main/packages/backend#readme`,
       bugs: project.bugs,
       keywords: ['contentful', 'translation', 'azure-functions'],
+      publishConfig: { access: 'public', registry: 'https://registry.npmjs.org/', provenance: true },
       type: 'module',
       engines: { node: '>=24' },
       sideEffects: false,

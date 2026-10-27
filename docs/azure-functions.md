@@ -154,10 +154,10 @@ The [`@ai-translator-for-contentful/backend`](../packages/backend/README.md) pac
 
 ### 1. Install the package
 
-The package is not published to the npm registry. [Build its tarball from source](../packages/backend/README.md#build-from-source) and install that file:
+Install the [backend package](https://www.npmjs.com/package/@ai-translator-for-contentful/backend) in your existing app:
 
 ```sh
-npm install /path/to/ai-translator-for-contentful-backend-<version>.tgz @azure/data-tables @azure/identity
+npm install @ai-translator-for-contentful/backend @azure/data-tables @azure/identity
 ```
 
 The app already depends on `@azure/functions`. `@azure/data-tables` and `@azure/identity` are needed only for the Table Storage gate in the example below; skip them if you supply your own shared gate.
