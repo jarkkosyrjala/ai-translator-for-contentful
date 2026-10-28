@@ -154,8 +154,6 @@ The [`@ai-translator-for-contentful/backend`](../packages/backend/README.md) pac
 
 ### 1. Install the package
 
-The first npm publication is pending. Until it is available, [build and install the tarball from source](../packages/backend/README.md#build-from-source). Once published, use the registry command below.
-
 Install the [backend package](https://www.npmjs.com/package/@ai-translator-for-contentful/backend) in your existing app:
 
 ```sh
