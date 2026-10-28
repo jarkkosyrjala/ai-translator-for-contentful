@@ -5,7 +5,7 @@ import { createServer as createHttpsServer } from 'node:https';
 import { createRequire } from 'node:module';
 import { connect, createServer } from 'node:net';
 import { tmpdir } from 'node:os';
-import { dirname, join, relative } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -22,7 +22,11 @@ const coreTools = process.argv.includes('--core-tools');
 const keep = process.argv.includes('--keep');
 const versionIndex = process.argv.indexOf('--version');
 const version = versionIndex < 0 ? '0.0.0' : process.argv[versionIndex + 1];
-if (!/^\d+\.\d+\.\d+$/.test(version ?? '')) throw new Error('Pass --version with a version such as 1.0.0.');
+if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version ?? ''))
+  throw new Error('Pass --version with a version such as 1.0.0.');
+const tarballIndex = process.argv.indexOf('--tarball');
+if (tarballIndex >= 0 && !process.argv[tarballIndex + 1]) throw new Error('Pass --tarball with a package file.');
+const suppliedTarball = tarballIndex < 0 ? undefined : resolve(process.argv[tarballIndex + 1]);
 const workspaceRequire = createRequire(join(root, 'packages/backend/package.json'));
 const tsc = join(root, 'node_modules/.bin/tsc');
 
@@ -503,12 +507,15 @@ async function coreToolsRun(dir, client, { prefix, stream, cors }, storage, prov
 async function main() {
   const work = await mkdtemp(join(tmpdir(), 'backend-package-'));
   try {
-    run('node', ['packages/backend/build.mjs', '--version', version], root);
-    run('npm', ['pack', '--pack-destination', work, '--silent'], join(root, 'packages/backend/dist'));
-    const tarball = join(
-      work,
-      (await readdir(work)).find(file => file.endsWith('.tgz')),
-    );
+    let tarball = suppliedTarball;
+    if (!tarball) {
+      run('node', ['packages/backend/build.mjs', '--version', version], root);
+      run('npm', ['pack', '--pack-destination', work, '--silent'], join(root, 'packages/backend/dist'));
+      tarball = join(
+        work,
+        (await readdir(work)).find(file => file.endsWith('.tgz')),
+      );
+    }
     await inspect(work, tarball);
     const client = await signingClient(work);
     const rootManifest = await versionOf('package.json');

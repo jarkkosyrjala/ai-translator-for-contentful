@@ -95,6 +95,3 @@ jobs:
       - run: node scripts/release-backend.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Bootstrap only. After npm trusted publishing is configured,
-          # remove this secret; publication then uses GitHub OIDC.
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
