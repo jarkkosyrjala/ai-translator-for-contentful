@@ -504,10 +504,19 @@ pre {
   margin-right: 12px;
 }
 .dialog-field-name {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   min-width: 0;
   white-space: nowrap;
 }
+.dialog-field-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .dialog-field-type {
+  flex: none;
   color: var(--gray-600);
   font-weight: var(--font-weight-normal);
 }
@@ -1154,12 +1163,12 @@ pre {
   }
   .dialog-field-row {
     min-height: 44px;
-    grid-template-columns: 20px auto minmax(0, 1fr);
+    grid-template-columns: 20px minmax(0, 1fr) minmax(0, 1fr);
     gap: 10px;
     border: 0;
   }
   .dialog-field-row-fixed {
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
   .dialog-fields {
     border: 0;
