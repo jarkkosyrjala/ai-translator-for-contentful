@@ -60,7 +60,7 @@ Follow your backend guide:
 - Cloudflare Worker: steps 1 and 2 of the [Worker guide](cloudflare-worker.md).
 - Azure Functions: steps 1 to 4 of the [Azure guide](azure-functions.md).
 - AWS Lambda: steps 1 to 3 of the [AWS guide](aws-lambda.md).
-- Contentful Function: steps 1 to 5 of [Deploy to a selected environment](contentful-function.md#deploy-to-a-selected-environment).
+- Contentful Function: fill in `.env.function.local` and run `pnpm upload:function-ci`, as described in the [Function guide](contentful-function.md#deploy-to-a-selected-environment). This also registers the Secret parameter definitions and App Actions. Complete it before installing or entering a provider credential.
 
 A Custom backend can use the static App Bundle ZIP from the GitHub release or a bundle built from the same tag. The Function App Bundle is always built from source with your provider hosts.
 

@@ -10,8 +10,8 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const functionDir = join(root, 'backends/contentful-function');
 const appBuild = join(root, 'apps/contentful-app/build');
 
-async function main() {
-  const args = loadEnvFileOption(process.argv.slice(2), functionEnvPath);
+export async function main(argv = process.argv.slice(2)) {
+  const args = loadEnvFileOption(argv, functionEnvPath);
   const checkOnly = args.length === 1 && args[0] === '--check';
   if (!checkOnly && args.length) throw new Error('Use no arguments, --check, or --env-file <path>.');
   const networks = parseFunctionAllowNetworks(process.env.CONTENTFUL_FUNCTION_ALLOW_NETWORKS);
@@ -34,6 +34,7 @@ async function main() {
   await run('pnpm', ['build:function-bundle'], root, childEnv);
 
   const previousBundleId = await activeBundleId(organization, definition, token);
+  await run(process.execPath, [join(root, 'scripts/sync-parameter-definitions.mjs')], root, childEnv);
 
   const staging = await mkdtemp(join(tmpdir(), 'contentful-ai-translator-function-'));
   try {
@@ -49,12 +50,22 @@ async function main() {
       throw new Error('Upload did not activate a new App Bundle. Check the Contentful CLI output.');
     }
     process.stdout.write(`Activated App Bundle ${currentBundleId}.\n`);
+    try {
+      await run(process.execPath, [join(root, 'scripts/sync-function-action.mjs')], root, childEnv);
+    } catch {
+      throw new Error(
+        'The App Bundle is active, but App Action setup failed. Run pnpm sync:function-action with the same settings file before installing or testing the app.',
+      );
+    }
+    process.stdout.write('Function setup is complete: Secret parameter definitions, App Bundle, and App Actions.\n');
   } finally {
     await rm(staging, { recursive: true, force: true });
   }
 }
 
-main().catch(error => {
-  process.stderr.write(`${error.message}\n`);
-  process.exitCode = 1;
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(error => {
+    process.stderr.write(`${error.message}\n`);
+    process.exitCode = 1;
+  });
+}
