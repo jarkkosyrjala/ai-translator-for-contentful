@@ -115,8 +115,8 @@ export function ChooseScreen(props: Props) {
             aria-label={`Translate ${field.name}`}
           />
         )}
-        <span className="dialog-field-name">
-          {field.name}
+        <span className="dialog-field-name" title={`${field.name} · ${type}`}>
+          <span className="dialog-field-label">{field.name}</span>
           <span className="dialog-field-type"> · {type}</span>
         </span>
         <span className="dialog-field-preview" title={fieldPreview(value)}>
