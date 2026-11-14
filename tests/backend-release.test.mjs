@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path';
 import { PassThrough } from 'node:stream';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import semanticRelease from 'semantic-release';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import config from '../release.backend.config.mjs';
 import { analyzeCommits, backendCommits, generateNotes } from '../scripts/semantic-release-backend.mjs';
 
@@ -54,7 +54,10 @@ beforeEach(() => {
   commits = [];
 });
 
-afterEach(() => rmSync(work, { recursive: true, force: true }));
+afterEach(() => {
+  vi.unstubAllEnvs();
+  rmSync(work, { recursive: true, force: true });
+});
 
 describe('npm backend release selection', () => {
   it('ignores frontend changes, including a breaking change and a misleading backend scope', async () => {
@@ -141,33 +144,42 @@ describe('npm backend release selection', () => {
     expect(result).not.toContain('frontend feature');
   });
 
-  it('uses independent tags in a real semantic-release dry run', async () => {
-    const plugin = fileURLToPath(new URL('../scripts/semantic-release-backend.mjs', import.meta.url));
-    // Deliberately conflicting project config: API options must override it.
-    write(
-      'release.config.mjs',
-      // biome-ignore lint/suspicious/noTemplateCurlyInString: fixture for semantic-release's template.
-      "export default { tagFormat: 'v${version}', plugins: ['@semantic-release/github'] };\n",
-    );
-    commit('packages/relay/src/index.ts', 'relay', 'fix(relay): correct backend');
-    git(['push', '-q', 'origin', 'main', '--tags']);
-    const output = new PassThrough();
-    output.resume();
-    const result = await semanticRelease(
-      { ...config, repositoryUrl: pathToFileURL(remote).href, plugins: [plugin], dryRun: true, ci: false },
-      { cwd, stdout: output, stderr: output },
-    );
-    expect(result.nextRelease.version).toBe('1.0.1');
-    expect(result.nextRelease.gitTag).toBe('backend-v1.0.1');
-    expect(git(['tag', '--list', 'backend-v1.0.1'])).toBe('');
+  it.each(['push', 'pull_request'])(
+    'uses independent tags in a real semantic-release dry run during %s',
+    async event => {
+      vi.stubEnv('GITHUB_ACTIONS', 'true');
+      vi.stubEnv('GITHUB_EVENT_NAME', event);
+      vi.stubEnv('GITHUB_EVENT_PATH', '');
+      vi.stubEnv('GITHUB_REF', event === 'pull_request' ? 'refs/pull/2/merge' : 'refs/heads/feature');
+      const plugin = fileURLToPath(new URL('../scripts/semantic-release-backend.mjs', import.meta.url));
+      // Deliberately conflicting project config: API options must override it.
+      write(
+        'release.config.mjs',
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: fixture for semantic-release's template.
+        "export default { tagFormat: 'v${version}', plugins: ['@semantic-release/github'] };\n",
+      );
+      commit('packages/relay/src/index.ts', 'relay', 'fix(relay): correct backend');
+      git(['push', '-q', 'origin', 'main', '--tags']);
+      const output = new PassThrough();
+      output.resume();
+      // Detect the fixture's main branch rather than inheriting the runner's CI branch or credentials.
+      const env = { PATH: process.env.PATH };
+      const result = await semanticRelease(
+        { ...config, repositoryUrl: pathToFileURL(remote).href, plugins: [plugin], dryRun: true, ci: false },
+        { cwd, env, stdout: output, stderr: output },
+      );
+      expect(result.nextRelease.version).toBe('1.0.1');
+      expect(result.nextRelease.gitTag).toBe('backend-v1.0.1');
+      expect(git(['tag', '--list', 'backend-v1.0.1'])).toBe('');
 
-    git(['tag', 'backend-v1.0.1']);
-    commit('apps/contentful-app/src/app.ts', 'frontend', 'feat(app): frontend only');
-    git(['push', '-q', 'origin', 'main', '--tags']);
-    const frontendOnly = await semanticRelease(
-      { ...config, repositoryUrl: pathToFileURL(remote).href, plugins: [plugin], dryRun: true, ci: false },
-      { cwd, stdout: output, stderr: output },
-    );
-    expect(frontendOnly).toBe(false);
-  });
+      git(['tag', 'backend-v1.0.1']);
+      commit('apps/contentful-app/src/app.ts', 'frontend', 'feat(app): frontend only');
+      git(['push', '-q', 'origin', 'main', '--tags']);
+      const frontendOnly = await semanticRelease(
+        { ...config, repositoryUrl: pathToFileURL(remote).href, plugins: [plugin], dryRun: true, ci: false },
+        { cwd, env, stdout: output, stderr: output },
+      );
+      expect(frontendOnly).toBe(false);
+    },
+  );
 });
