@@ -10,7 +10,7 @@ On the configuration screen, you enter the model API's **Provider URL**, for exa
 
 A Contentful Function can call only the hosts listed in its `allowNetworks` setting, which is fixed when the App Bundle is uploaded. The tracked [manifest](../backends/contentful-function/contentful-app-manifest.json) allows none. The upload grants these hosts to the `providerModels` and `translateProvider` Functions; the connection check, `functionHealth`, has no network access. Set `CONTENTFUL_FUNCTION_ALLOW_NETWORKS` to a JSON array of exact provider hostnames, with a port when it is not the default: for `https://model.example/v1`, use `["model.example"]`. Do not include a scheme or path. The list applies to every installation of the App Definition, so include the hosts of all of them. To allow another host later, upload a new bundle. Enabling more models at a provider whose host is already allowed needs no upload.
 
-The upload command builds the frontend and the Functions, writes a temporary manifest with these hosts outside the repository, runs Contentful's upload there, and then removes the temporary manifest. The tracked manifest never changes.
+The upload command builds the frontend and the Functions, registers the installation parameter definitions (including Secrets), uploads and activates the bundle with a temporary manifest, and registers the three App Actions. The temporary manifest is removed afterward; the tracked manifest never changes.
 
 ## Settings file
 
@@ -25,18 +25,24 @@ cp .env.function.local.example .env.function.local
 - `CONTENTFUL_APP_DEF_ID`: the App Definition's ID, shown on its **App details** page and in the browser URL. It is not the space ID.
 - `CONTENTFUL_ACCESS_TOKEN`: a [personal access token](https://www.contentful.com/help/faq/personal-access-tokens/) (CMA token) with the `content_management_manage` scope, from a user who can manage apps in the organization. Create it under **Settings** > **CMA tokens**. Delivery and Preview API tokens cannot manage App Definitions.
 
+The CMA token authorizes deployment to Contentful. Enter the model provider's API key later in the app's configuration screen; it does not belong in this file.
+
 Shell or CI variables take precedence over the file, so CI can use its secret store instead. To manage several installations from one checkout, keep one ignored `.env.<name>.local` file per installation and pass `--env-file <path>` to `check:function-networks`, `sync:parameters`, `upload:function-ci`, and `sync:function-action`.
 
 ## Deploy to a selected environment
 
 1. Confirm the App Definition, its organization, and its installations: a bundle upload affects all of them. Record the active bundle ID, the App Action definitions, and the non-Secret installation parameters for rollback.
-2. Run `pnpm check:function-networks`. It validates `CONTENTFUL_FUNCTION_ALLOW_NETWORKS` without printing the hosts.
-3. Run `pnpm sync:parameters`. It sets the App Definition's installation parameter definitions to the app's own, including the Secret parameters for the provider API key and extra headers.
-4. Run `pnpm upload:function-ci`. It builds and uploads the App Bundle with the `functionHealth`, `providerModels`, and `translateProvider` Functions and your allowed hosts. Check that the new bundle is active and that the App Definition keeps its name and installations. Do not use `upload:static-ci` here.
-5. Run `pnpm sync:function-action` to create or update the App Actions that run the three Functions. The health and model list actions never call a model.
-6. Install the app in the target space environment if you have not yet, and open its configuration. Choose **Contentful Function** and enter the **Provider URL**. Add a **Provider API key** if required; otherwise choose **No authentication** under **Advanced provider settings**. Click **Save**. If you saved a key, reopen the configuration to check that it shows "Saved as a secret".
-7. Under **Models editors may use**, select **Load models**, check the models editors may use, or add model IDs the provider does not list, and choose the **Default model**. Click **Save** again. Optionally, select a saved model and **Test model**; it sends one short synthetic translation and is a paid model call.
-8. With test content, translate one field, apply the suggestion, and reload. Nothing is published.
+2. With the settings file filled in, run:
+
+   ```sh
+   pnpm upload:function-ci
+   ```
+
+   This validates the allowed hosts, builds the frontend and Functions, registers the Secret and other parameter definitions, uploads and activates the App Bundle, and creates or updates the `functionHealth`, `providerModels`, and `translateProvider` App Actions. Wait for **Function setup is complete** before installing or entering a provider credential. `pnpm check:function-networks` is an optional offline check of the allowed hosts. Do not use `upload:static-ci` here.
+3. Check that the new bundle is active and that the App Definition keeps its name and installations. A bundle uploaded through the web app does not create the parameter definitions or App Actions; seeing Functions on the definition does not confirm those setup steps are complete.
+4. Install the app in the target space environment if you have not yet, and open its configuration. Choose **Contentful Function** and enter the **Provider URL**. Add a **Provider API key** if required; otherwise choose **No authentication** under **Advanced provider settings**. Click **Save**. Reopen the configuration, check that a saved key shows "Saved as a secret", and select **Test connection**.
+5. Under **Models editors may use**, select **Load models**, check the models editors may use, or add model IDs the provider does not list, and choose the **Default model**. Click **Save** again. Optionally, select a saved model and **Test model**; it sends one short synthetic translation and is a paid model call.
+6. With test content, translate one field, apply the suggestion, and reload. Nothing is published.
 
 **Load models** asks the `providerModels` Function to list the provider's model IDs with the saved URL, key, and headers; it calls no model, so save provider changes first. A newly listed model starts unchecked, and models missing from a later list stay enabled with "Not returned by model discovery" until you remove them. The list only works if the provider has an OpenAI-compatible `GET /models`; otherwise add IDs by hand. **Test connection** checks only that the Function runs in this environment and finds a saved Provider URL and key: "The Function ran in this environment. Provider network access was not tested." Editors cannot translate until at least one model and a default are saved.
 
@@ -56,7 +62,7 @@ The Function accepts requests and returns results of up to 512 KiB, a conservati
 
 ## Secrets
 
-The provider API key and the additional headers are Secret installation parameters of this space environment. Only the Function receives their values; the App SDK and personal access token reads return a redacted value.
+The provider API key and the additional headers are Secret installation parameters of this space environment. `upload:function-ci` registers their `Secret` types on the App Definition before uploading. Enter their values in the installed app's configuration screen after setup succeeds; you do not need to create Secret definitions by hand. Only the Function receives their values; the App SDK and personal access token reads return a redacted value.
 
 - Saving without touching the key keeps it. **Replace** writes a new key; **Clear** removes it, and translation stops until a key is saved.
 - Switching temporarily to **Custom backend** keeps the saved key.
@@ -65,6 +71,14 @@ The provider API key and the additional headers are Secret installation paramete
 - The Function compiles instructions only with the saved instruction profile, or the app's defaults when none is saved, and rejects a request that names another profile revision. A profile saved by an earlier app version must be reset to the defaults and saved before editors can translate.
 
 ## Troubleshooting
+
+If **Test connection** says "The Contentful Function could not finish. Ask a space admin to check its deployment and configuration.", check App Definition setup first. For a bundle that already contains the three Functions, run these commands with the same settings file:
+
+```sh
+pnpm sync:parameters && pnpm sync:function-action
+```
+
+They register the parameter definitions and App Actions without uploading a bundle or replacing the saved provider credential. Reload the app configuration and test again. For a different settings file, pass `--env-file <path>` to both commands. If setup is complete and the check still fails, inspect the Function logs and environment permissions. **Test connection** does not contact the provider, so this generic error does not establish that the provider key is wrong.
 
 A wrong key, model, or provider host shows as an error on the translated field. Check the Provider URL, the allowed hosts of the active bundle, the App Actions, the installation environment, and the Function's logs. Contentful can replace an error thrown by a Function with a generic App Action failure, so the Functions return error codes in their results for expected configuration and provider failures.
 
